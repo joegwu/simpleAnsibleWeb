@@ -1,0 +1,32 @@
+---
+  - name: copy haproxy script
+    copy: src=InstallHaProxy.sh dest=/tmp/ mode=0755
+  - name: install and condifure haproxy
+    shell: /tmp/InstallHaProxy.sh
+
+  - name: set firewall
+    template: src=iptables-save dest=/etc/sysconfig/iptables
+  - name: restart iptables
+    action: service name=iptables state=restarted
+########## enable SSL
+  - name: install mod_ssl for httpd SSL configuration
+    yum: name=mod_ssl state=latest
+  - name: install openssl for httpd SSL configuration
+    yum: name=openssl state=latest
+  - name: copy Certs
+    copy: src=createCerts.sh dest=/tmp/ mode=0755
+  - name: execute script
+    shell: /tmp/createCerts.sh
+  - name: copy haproxy SSLfile
+    copy: src=haproxy.cfg.sslenabled dest=/etc/haproxy/haproxy.cfg
+
+
+## replace the correct haproxy and webservers ipaddresses in /etc/haproxy/haproxy.cfg
+  - replace: dest=/etc/haproxy/haproxy.cfg regexp='10.0.0.103' replace={{ ha }} backup=yes  
+  - replace: dest=/etc/haproxy/haproxy.cfg regexp='10.0.0.152' replace={{ web1 }} backup=yes  
+  - replace: dest=/etc/haproxy/haproxy.cfg regexp='10.0.0.153' replace={{ web2 }} backup=yes  
+##
+  - name: restart haproxy
+    action: service name=haproxy state=restarted enabled=yes
+
+
