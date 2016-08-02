@@ -1,0 +1,19 @@
+---
+# This playbook deploys a simple httpd server . 
+
+- hosts: web
+  user: ec2-user
+  sudo: yes
+  tasks:
+  - name: yum install httpd
+    yum: name=httpd state=latest
+  - name: start httpd and enable start on boot
+    action: service name=httpd state=started enabled=yes
+  - name: copy index.html 
+    copy: src=index.html dest=/var/www/html/
+  - name: restart httpd
+    action: service name=httpd state=restarted
+  - name: deploy iptables rules
+    copy: src=iptables-save dest=/etc/sysconfig/iptables
+  - name: restart iptables
+    action: service name=iptables state=restarted

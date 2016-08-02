@@ -1,0 +1,5 @@
+# Here are variables related to the ha installation
+ha: 54.218.126.83
+web1: 54.213.248.169
+web2: 54.213.248.180
+https_port: 443

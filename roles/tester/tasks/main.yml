@@ -1,0 +1,26 @@
+---
+# This playbook deploys a simple httpd server . 
+
+  - name: yum install nmap
+    yum: name=nmap state=latest
+  - name: run nmap scan
+    shell: nmap -sS {{ web_host }}
+    register: nmap_result
+    ignore_errors: yes
+  - name: review nmap results
+    debug: msg={{ nmap_result['stdout'] }}
+  - name: yum install httpd-tools
+    yum: name=httpd-tools state=latest
+
+  - name: get web content
+    shell: ab -n 1000 -c 5 http://{{ web_host }}/
+    register: ab_result
+    ignore_errors: yes
+  - name: review ab result
+    debug: msg={{ ab_result['stdout'] }}
+#  - name: restart httpd
+#    action: service name=httpd state=restarted
+#  - name: deploy iptables rules
+#    template: src=iptables-save dest=/etc/sysconfig/iptables
+#  - name: restart iptables
+#    action: service name=iptables state=restarted

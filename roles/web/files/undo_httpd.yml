@@ -1,0 +1,15 @@
+---
+# This playbook deploys a simple standalone JBoss server. 
+
+- hosts: web
+  user: ec2-user
+  sudo: yes
+  tasks:
+  - name: Delete all copied rpms
+    shell: rm -rf /tmp/*.rpm
+  - name: yum remove httpd
+    yum: name=httpd state=absent
+  - name: remove certs
+    shell: rm -rf /etc/pki/tls/certs/localhost.crt /etc/pki/tls/private/localhost.key
+  - name: purge iptables
+    shell: iptables -F

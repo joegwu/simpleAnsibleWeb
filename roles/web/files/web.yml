@@ -1,0 +1,31 @@
+---
+# This playbook deploys a simple httpd server . 
+
+- hosts: web
+  user: ec2-user
+  sudo: yes
+  tasks:
+  - name: yum install httpd
+    yum: name=httpd state=latest
+  - name: start httpd and enable start on boot
+    action: service name=httpd state=started enabled=yes
+  - name: copy index.html 
+    copy: src=index.html dest=/var/www/html/
+  - name: install mod_ssl for httpd SSL configuration
+    yum: name=mod_ssl state=latest
+  - name: install openssl for httpd SSL configuration
+    yum: name=openssl state=latest
+  - name: create Certs
+    copy: src=createCerts.sh dest=/tmp/ mode=0755
+  - name: execute script
+    shell: /tmp/createCerts.sh
+  - name: reconfigure httpd to redirect http to https
+    copy: src=reconfig_httpd.txt dest=/tmp/
+  - name: reconfigure httpd.conf file
+    shell: cat /tmp/reconfig_httpd.txt >> /etc/httpd/conf/httpd.conf
+  - name: restart httpd
+    action: service name=httpd state=restarted
+  - name: deploy iptables rules
+    template: src=iptables-save dest=/etc/sysconfig/iptables
+  - name: restart iptables
+    action: service name=iptables state=restarted
